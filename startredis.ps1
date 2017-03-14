@@ -1,0 +1,1 @@
+ docker run --name redisserver --rm -p 6379:6379 -it redis

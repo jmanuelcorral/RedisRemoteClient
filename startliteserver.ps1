@@ -1,0 +1,1 @@
+ docker run --name redisremoteclient --rm -v ./source:/app -p 3306:3306 -it microsoft/dotnet:latest
