@@ -1,72 +1,8 @@
-﻿using Newtonsoft.Json;
-using StackExchange.Redis;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace LiteServer
 {
-    public class BaseCommand
-    {
-        public string RemoteCommand { get; set; }
-        public string RemoteOutput { get; set; }
-       // public string CallbackUrl { get; set; }
-       // public bool CanIDispach { get; set; }
-    }
-
-    public interface IServiceBus<T> : IDisposable where T : BaseCommand
-    {
-        void Publish(T message);
-        void Subscribe(Action<T> actionToBePerformed);
-    }
-
-    public class ServiceBus<T> : IServiceBus<T> where T : BaseCommand
-    {
-
-
-        private readonly ServiceBusConfiguration _configuration;
-        private readonly IConnectionMultiplexer _cnMultiplexer;
-        private readonly ISubscriber _subscriber;
-
-        public ServiceBus(ServiceBusConfiguration configuration)
-        {
-            _configuration = configuration;
-            _cnMultiplexer = ConnectionMultiplexer.Connect($"{configuration.Host}:{configuration.Port}");
-            _subscriber = _cnMultiplexer.GetSubscriber();
-        }
-
-        public void Publish(T message)
-        {
-            Console.WriteLine($"publish Action Launch, message: {JsonConvert.SerializeObject(message)}");
-            _subscriber.Publish(_configuration.ChannelName, JsonConvert.SerializeObject(message));
-            
-        }
-
-        public void Subscribe(Action<T> actionToBePerformed)
-        {
-            _subscriber.Subscribe(_configuration.ChannelName, (channel, message) => {
-                Console.WriteLine($"subscribe Action Launch, message: {message}");
-                actionToBePerformed.Invoke(JsonConvert.DeserializeObject<T>(message));
-            });
-        }
-
-        public void Dispose()
-        {
-            _cnMultiplexer.Dispose();
-
-        }
-    }
-
-    public class ServiceBusConfiguration
-    {
-        public string ChannelName { get; set; }
-        public string Host { get; set; }
-        public int Port { get; set; }
-        public string ClientName { get; set; }
-
-    }
-
-
-  
     class Program
     {
         public static bool KeepRunning = true;
